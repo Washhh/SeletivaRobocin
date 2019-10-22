@@ -25,9 +25,9 @@
 //classe dos Robos
 class Robos{
     public:
-        double cont     = 0.0;
-        int ID_ROBOT    = 0;
-        int Robo_Ativo  = 0;
+        double cont=0.0;
+        int ID_ROBOT=0;
+        int Robo_Ativo=0;
         float x;
         float y;
         float pixel_x;
@@ -67,12 +67,16 @@ void PERDA_YELLOW(int Cont_Indice_yellow...){
     
 }
 //.......................................
-void printRobotInfo(Robos robot) {
+void printRobotInfo(const SSL_DetectionRobot & robot) {
     printf("CONF=%4.2f ", robot.confidence());
-    printf("ID=%3d ",robot.robot_id());
+    if (robot.has_robot_id()) {
+        printf("ID=%3d ",robot.robot_id());
+    } 
     printf(" HEIGHT=%6.2f POS=<%9.2f,%9.2f> ",robot.height(),robot.x(),robot.y());
     if (robot.has_orientation()) {
         printf("ANGLE=%6.3f ",robot.orientation());
+    } else {
+        printf("ANGLE=N/A    ");
     }
     printf("RAW=<%8.2f,%8.2f>\n",robot.pixel_x(),robot.pixel_y());
 }
