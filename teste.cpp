@@ -38,48 +38,33 @@ class Robos{
 };
 //................
 //FIltro de perda
-void PERDA_BLUE(int Cont_Indice_blue, Robos *Blue){
+void PERDA(int Cont_Indice_TIME, Robos *TIME){
 
-        for(int x = 0; x < Cont_Indice_blue; x++){
+        for(int x = 0; x < Cont_Indice_TIME; x++){
                 
             //cout << "tempo de " << x << " : " << ((clock() - vetor[x].contador)/CLOCKS_PER_SEC) << endl;
             //cout << endl, endl;
                 
-            if(((clock() - Blue[x].cont)/CLOCKS_PER_SEC) >= TempoLimite){
-                cout << "o robo Azul de ID " << Blue[x].ID_ROBOT << " deu perda" << endl;
-                Blue[x].Robo_Ativo = 1;
+            if(((clock() - TIME[x].cont)/CLOCKS_PER_SEC) >= TempoLimite){
+                cout << "o robo Azul de ID " << TIME[x].ID_ROBOT << " deu perda" << endl;
+                TIME[x].Robo_Ativo = 1;
             }
         }
 
     
 
-}
-void PERDA_YELLOW(int Cont_Indice_yellow, Robos *Yellow){
-
-        for(int x = 0; x < Cont_Indice_yellow; x++){
-                
-            //cout << "tempo de " << x << " : " << ((clock() - vetor[x].contador)/CLOCKS_PER_SEC) << endl;
-            //cout << endl, endl;
-                
-            if(((clock() - Yellow[x].cont)/CLOCKS_PER_SEC) >= TempoLimite){
-                cout << "o robo Amarelo de ID " << Yellow[x].ID_ROBOT << " deu perda" << endl;
-                Yellow[x].Robo_Ativo = 1;
-            }
-        }
-
-    
 }
 //.......................................
 
 // printar as informações do robo
 void printRobotInfo(Robos robot, int has_orientation_valid) {
-    printf("CONF=%4.2f ", robot.confidence;
-    printf("ID=%3d ",robot.ID_ROBOT;
-    printf(" HEIGHT=%6.2f POS=<%9.2f,%9.2f> ",robot.height,robot.x,robot.y;
+    printf("CONF=%4.2f ", robot.confidence);
+    printf("ID=%3d ",robot.ID_ROBOT);
+    printf(" HEIGHT=%6.2f POS=<%9.2f,%9.2f> ",robot.height,robot.x,robot.y);
     if (has_orientation_valid == 1) {
         printf("ANGLE=%6.3f ",robot.orientation());
     }
-    printf("RAW=<%8.2f,%8.2f>\n",robot.pixel_x(),robot.pixel_y());
+    printf("RAW=<%8.2f,%8.2f>\n",robot.pixel_x,robot.pixel_y);
 }
 //...................................................
 
@@ -143,26 +128,24 @@ int main(int argc, char *argv[]){
                             if(Blue[J].ID_ROBOT == robot.robot_id()){
                                 Blue[J].cont= clock();
                                 Blue[J].Robo_Ativo = 0;
-                                Blue[J].pixel_x = robot.pixel_x;
-                                Blue[J].pixel_y= robot.pixel_y;
-                                Blue[J].x = robot.x;
-                                Blue[J].y = robot.y;
-                                Blue[J].orientation = robot.orientation;
-                                Blue[J].height = robot.height;
-                                Blue[J].confidence = robot.confidence;
+                                Blue[J].pixel_x = robot.pixel_x();
+                                Blue[J].pixel_y= robot.pixel_y();
+                                Blue[J].orientation = robot.orientation();
+                                Blue[J].height = robot.height();
+                                Blue[J].confidence = robot.confidence();
                                 NewID=1;// NewID = 1 -> ID Já identificado       
                             }
                         // registrar novo ID 
                             if(NewID==0){
                                 Blue[Cont_Indice_blue].ID_ROBOT = robot.robot_id();
                                 Blue[Cont_Indice_blue].cont = clock();
-                                Blue[Cont_Indice_blue].x = robot.x;
-                                Blue[Cont_Indice_blue].y = robot.y;
-                                Blue[Cont_Indice_blue].pixel_x = robot.pixel_x;
-                                Blue[Cont_Indice_blue].pixel_y = robot.pixel_y;
-                                Blue[Cont_Indice_blue].orientation = robot.orientation;
-                                Blue[Cont_Indice_blue].height = robot.height;
-                                Blue[Cont_Indice_blue].confidence = robot.confidence;
+                                Blue[Cont_Indice_blue].x = robot.x();
+                                Blue[Cont_Indice_blue].y = robot.y();
+                                Blue[Cont_Indice_blue].pixel_x = robot.pixel_x();
+                                Blue[Cont_Indice_blue].pixel_y = robot.pixel_y();
+                                Blue[Cont_Indice_blue].orientation = robot.orientation();
+                                Blue[Cont_Indice_blue].height = robot.height();
+                                Blue[Cont_Indice_blue].confidence = robot.confidence();
                                 Cont_Indice_blue++;
                             }
                         
@@ -190,7 +173,7 @@ int main(int argc, char *argv[]){
                         kalman_filter(...)//argumentos
                     }
                 }
-                PERDA_BLUE(Cont_Indice_blue, Blue)//completar Argumentos
+                PERDA(Cont_Indice_blue, Blue)//completar Argumentos
                 //....................................................
 
                 //Yellow robot info:
@@ -205,6 +188,11 @@ int main(int argc, char *argv[]){
                             if(Yellow[J].ID_ROBOT == robot.robot_id()){
                                 Yellow[J].cont= clock();
                                 Yellow[J].Robo_Ativo = 0;
+                                Yellow[J].pixel_x = robot.pixel_x();
+                                Yellow[J].pixel_y= robot.pixel_y();
+                                Yellow[J].orientation = robot.orientation();
+                                Yellow[J].height = robot.height();
+                                Yellow[J].confidence = robot.confidence();
                                 NewID=1;// NewID = 1 -> ID Já identificado       
                             }
                         // registrar novo ID 
@@ -232,7 +220,7 @@ int main(int argc, char *argv[]){
                         kalman_filter(...)//argumentos
                     }
                 }
-                PERDA_YELLOW(Cont_Indice_yellow, Yellow)//completar Argumentos
+                PERDA(Cont_Indice_yellow, Yellow)//completar Argumentos
                 //....................................................
 
             //see if packet contains geometry data:
