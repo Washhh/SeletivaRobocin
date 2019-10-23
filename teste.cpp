@@ -26,16 +26,19 @@
 class Robos{
     public:
         double cont     = 0.0;
-        int ID_ROBOT    = 0;
+        int ID_ROBOT    = -1;
         int Robo_Ativo  = 0;
         float x;
         float y;
         float pixel_x;
         float pixel_y;
+        float height;
+        float orientation;
+        float confidence;
 };
 //................
 //FIltro de perda
-void PERDA_BLUE(int Cont_Indice_blue...){
+void PERDA_BLUE(int Cont_Indice_blue, Robos *Blue){
 
         for(int x = 0; x < Cont_Indice_blue; x++){
                 
@@ -51,7 +54,7 @@ void PERDA_BLUE(int Cont_Indice_blue...){
     
 
 }
-void PERDA_YELLOW(int Cont_Indice_yellow...){
+void PERDA_YELLOW(int Cont_Indice_yellow, Robos *Yellow){
 
         for(int x = 0; x < Cont_Indice_yellow; x++){
                 
@@ -67,15 +70,18 @@ void PERDA_YELLOW(int Cont_Indice_yellow...){
     
 }
 //.......................................
-void printRobotInfo(Robos robot) {
-    printf("CONF=%4.2f ", robot.confidence());
-    printf("ID=%3d ",robot.robot_id());
-    printf(" HEIGHT=%6.2f POS=<%9.2f,%9.2f> ",robot.height(),robot.x(),robot.y());
-    if (robot.has_orientation()) {
+
+// printar as informações do robo
+void printRobotInfo(Robos robot, int has_orientation_valid) {
+    printf("CONF=%4.2f ", robot.confidence;
+    printf("ID=%3d ",robot.ID_ROBOT;
+    printf(" HEIGHT=%6.2f POS=<%9.2f,%9.2f> ",robot.height,robot.x,robot.y;
+    if (has_orientation_valid == 1) {
         printf("ANGLE=%6.3f ",robot.orientation());
     }
     printf("RAW=<%8.2f,%8.2f>\n",robot.pixel_x(),robot.pixel_y());
 }
+//...................................................
 
 int main(int argc, char *argv[]){
     (void)argc;
@@ -85,12 +91,14 @@ int main(int argc, char *argv[]){
     SSL_WrapperPacket packet;
 
     GrSim_Client grSim_client;
-    //Declarando o vetor de Robos
+
+    //Declarando os parametros utilizados nas manipulações de dados
     Cont_Indice_blue=0;
     Cont_Indice_yellow=0;
-    Robos Blue[5];
-    Robos Yellow[5];
+    Robos Blue[8];
+    Robos Yellow[8];
     //................
+
     while(true) {
         if (client.receive(packet)) {
             printf("-----Received Wrapper Packet---------------------------------------------\n");
@@ -135,6 +143,13 @@ int main(int argc, char *argv[]){
                             if(Blue[J].ID_ROBOT == robot.robot_id()){
                                 Blue[J].cont= clock();
                                 Blue[J].Robo_Ativo = 0;
+                                Blue[J].pixel_x = robot.pixel_x;
+                                Blue[J].pixel_y= robot.pixel_y;
+                                Blue[J].x = robot.x;
+                                Blue[J].y = robot.y;
+                                Blue[J].orientation = robot.orientation;
+                                Blue[J].height = robot.height;
+                                Blue[J].confidence = robot.confidence;
                                 NewID=1;// NewID = 1 -> ID Já identificado       
                             }
                         // registrar novo ID 
@@ -145,6 +160,9 @@ int main(int argc, char *argv[]){
                                 Blue[Cont_Indice_blue].y = robot.y;
                                 Blue[Cont_Indice_blue].pixel_x = robot.pixel_x;
                                 Blue[Cont_Indice_blue].pixel_y = robot.pixel_y;
+                                Blue[Cont_Indice_blue].orientation = robot.orientation;
+                                Blue[Cont_Indice_blue].height = robot.height;
+                                Blue[Cont_Indice_blue].confidence = robot.confidence;
                                 Cont_Indice_blue++;
                             }
                         
@@ -159,13 +177,20 @@ int main(int argc, char *argv[]){
 
                     }
                 }
+                // definir robos a serem mostrados em tela
                 for(int J=0; J < Cont_Indice_blue; J++){
                     if(Blue[J].Robo_Ativo == 0){
-                        printRobotInfo(Blue[J]);
+                        // Definir se foi recebido a orientação
+                        int has_orientation_valid = 0;
+                        if(robot.has_orientation()){
+                            has_orientation_valid = 1;
+                        }
+                        //
+                        printRobotInfo(Blue[J], has_orientation_valid);
                         kalman_filter(...)//argumentos
                     }
                 }
-                PERDA_BLUE(Cont_Indice_blue...)//completar Argumentos
+                PERDA_BLUE(Cont_Indice_blue, Blue)//completar Argumentos
                 //....................................................
 
                 //Yellow robot info:
@@ -190,6 +215,9 @@ int main(int argc, char *argv[]){
                                 Yellow[Cont_Indice_yellow].y = robot.y;
                                 Yellow[Cont_Indice_yellow].pixel_x = robot.pixel_x;
                                 Yellow[Cont_Indice_yellow].pixel_y = robot.pixel_y;
+                                Yellow[Cont_Indice_yellow].orientation = robot.orientation;
+                                Yellow[Cont_Indice_yellow].height = robot.height;
+                                Yellow[Cont_Indice_yellow].confidence = robot.confidence;
                                 Cont_Indice_yellow++;
                             }
                         }
@@ -204,7 +232,7 @@ int main(int argc, char *argv[]){
                         kalman_filter(...)//argumentos
                     }
                 }
-                PERDA_YELLOW(Cont_Indice_blue...)//completar Argumentos
+                PERDA_YELLOW(Cont_Indice_yellow, Yellow)//completar Argumentos
                 //....................................................
 
             //see if packet contains geometry data:
