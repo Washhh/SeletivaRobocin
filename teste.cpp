@@ -30,6 +30,8 @@ class Robos{
         int Robo_Ativo  = 0;
         float x;
         float y;
+        float x_novo;
+        float y_novo;
         float pixel_x;
         float pixel_y;
         float height;
@@ -128,6 +130,8 @@ int main(int argc, char *argv[]){
                             if(Blue[J].ID_ROBOT == robot.robot_id()){
                                 Blue[J].cont= clock();
                                 Blue[J].Robo_Ativo = 0;
+                                Blue[J].x_novo = robot.x();
+                                Blue[J].y_novo = robot.y();
                                 Blue[J].pixel_x = robot.pixel_x();
                                 Blue[J].pixel_y= robot.pixel_y();
                                 Blue[J].orientation = robot.orientation();
@@ -188,6 +192,8 @@ int main(int argc, char *argv[]){
                             if(Yellow[J].ID_ROBOT == robot.robot_id()){
                                 Yellow[J].cont= clock();
                                 Yellow[J].Robo_Ativo = 0;
+                                Yellow[J].x_novo = robot.x();
+                                Yellow[J].y_novo = robot.y();
                                 Yellow[J].pixel_x = robot.pixel_x();
                                 Yellow[J].pixel_y= robot.pixel_y();
                                 Yellow[J].orientation = robot.orientation();
@@ -199,13 +205,13 @@ int main(int argc, char *argv[]){
                             if(NewID==0){
                                 Yellow[Cont_Indice_yellow].ID_ROBOT = robot.robot_id();
                                 Yellow[Cont_Indice_yellow].cont = clock();
-                                Yellow[Cont_Indice_yellow].x = robot.x;
-                                Yellow[Cont_Indice_yellow].y = robot.y;
-                                Yellow[Cont_Indice_yellow].pixel_x = robot.pixel_x;
-                                Yellow[Cont_Indice_yellow].pixel_y = robot.pixel_y;
-                                Yellow[Cont_Indice_yellow].orientation = robot.orientation;
-                                Yellow[Cont_Indice_yellow].height = robot.height;
-                                Yellow[Cont_Indice_yellow].confidence = robot.confidence;
+                                Yellow[Cont_Indice_yellow].x = robot.x();
+                                Yellow[Cont_Indice_yellow].y = robot.y();
+                                Yellow[Cont_Indice_yellow].pixel_x = robot.pixel_x();
+                                Yellow[Cont_Indice_yellow].pixel_y = robot.pixel_y();
+                                Yellow[Cont_Indice_yellow].orientation = robot.orientation();
+                                Yellow[Cont_Indice_yellow].height = robot.height();
+                                Yellow[Cont_Indice_yellow].confidence = robot.confidence();
                                 Cont_Indice_yellow++;
                             }
                         }
