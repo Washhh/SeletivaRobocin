@@ -20,14 +20,24 @@
 #include "pb/grSim_Packet.pb.h"
 #include "pb/grSim_Commands.pb.h"
 #include "pb/grSim_Replacement.pb.h"
+#include <iostream>
+
+#include <Eigen/Dense>
+
 
 #define TempoLimite 0.3
+
 //classe dos Robos
 class Robos{
     public:
+        bool Atualizado = false;
+        bool Identificado = false;
+        bool has_orietation;
         double cont     = 0.0;
         int ID_ROBOT    = -1;
         int Robo_Ativo  = 0;
+        double dx;
+        double dy;
         float x;
         float y;
         float x_novo;
@@ -39,6 +49,65 @@ class Robos{
         float confidence;
 };
 //................
+//Kalman
+void Kalman_filter(Robos Robot){
+    int n = 4; // Number of states
+    int m = 2; // Number of measurements
+
+    double dt = 1.0/60; // Time step
+
+    Eigen::MatrixXd A(n, n); // System dynamics matrix
+    Eigen::MatrixXd C(m, n); // Output matrix
+    Eigen::MatrixXd Q(n, n); // Process noise covariance
+    Eigen::MatrixXd R(m, m); // Measurement noise covariance
+    Eigen::MatrixXd P(n, n); // Estimate error covariance
+    
+    // sentando as matrizes
+    A << 1, 0, dt, 0, 0, 1, 0, dt, 0, 0, 1, 0, 0, 0, 0, 1;
+    C << 1, 0, 0, 0, 0, 1, 0, 0;
+    Q << .05, .05, .0, .05,.05, .05, .0, .05,.05, .05, .0, .05,.05, .05, .0, .05;
+    R << 5, 5, 5, 5;
+    P << .1, .1, .1, .1, 10000, 10, .1, 10, 100, .1, .1, .1, .1,10000, 10, .1;
+
+    //Montando o filtro
+
+    I.setIdentity();
+    Eigen::VectorXd X(n);
+    Eigen::VectorXd Y(m);
+    X << Robot.x, Robot.y, Robot.vx, Robot.vy;
+    Y << Robot.x_novo, Robot.y_novo;
+
+    if(Robot.Atualizado == true){ // corrigir, salvar, predict
+
+        // corrigindo meu valor predito anteriormente
+        P = A*P*A.transpose() + Q;
+        K = P*C.transpose()*(C*P*C.transpose() + R).inverse();
+        //P = (I - K*C)*P;
+        X += K * (Y - C*X);
+
+        // Salvando
+        Saida = C*X; 
+
+        //PREDICT
+        X_NEW = A*X; 
+        
+    }
+    else{ // salvar, predict
+
+        // Salvando
+        Saida = C*X;
+
+        // PREDICT
+        X_NEW = A*X;
+        X_NEW = C*X_NEW;
+    }
+
+    Robot.x_novo = Saida(1,1);
+    Robot.y_novo = Saida(2,1);
+    Robot.x = X_NEW(1,1);
+    Robot.y = X_NEW(2,1);
+    Robot.Atualizado = false; // garantir que ele só execute correção na próxima vez caso seja entregue seu ponto x,y
+}
 //FIltro de perda
 void PERDA(int Cont_Indice_TIME, Robos *TIME){
 
@@ -62,7 +131,7 @@ void PERDA(int Cont_Indice_TIME, Robos *TIME){
 void printRobotInfo(Robos robot, int has_orientation_valid) {
     printf("CONF=%4.2f ", robot.confidence);
     printf("ID=%3d ",robot.ID_ROBOT);
-    printf(" HEIGHT=%6.2f POS=<%9.2f,%9.2f> ",robot.height,robot.x,robot.y);
+    printf(" HEIGHT=%6.2f POS=<%9.2f,%9.2f> ",robot.height,robot.x_novo,robot.y_novo);
     if (has_orientation_valid == 1) {
         printf("ANGLE=%6.3f ",robot.orientation());
     }
@@ -134,22 +203,40 @@ int main(int argc, char *argv[]){
                                 Blue[J].y_novo = robot.y();
                                 Blue[J].pixel_x = robot.pixel_x();
                                 Blue[J].pixel_y= robot.pixel_y();
-                                Blue[J].orientation = robot.orientation();
                                 Blue[J].height = robot.height();
                                 Blue[J].confidence = robot.confidence();
-                                NewID=1;// NewID = 1 -> ID Já identificado       
+                                Blue[J].vx = (Blue[J].x_novo - Blue[J].x)/dt
+                                Blue[J].vy = (Blue[J].y_novo - Blue[J].y)/dt
+                                Blue[J].Identificado = true;
+                                Blue[J].Atualizado = true;
+                                NewID=1;// NewID = 1 -> ID Já identificado  
+                                if(robot.has_orietation()){
+                                    Blue[J].orientation = robot.orientation();
+                                    Blue[J].has_orietation = true;
+                                } 
+                                else{
+                                    Blue[J].has_orietation = false;
+                                }    
                             }
                         // registrar novo ID 
                             if(NewID==0){
                                 Blue[Cont_Indice_blue].ID_ROBOT = robot.robot_id();
                                 Blue[Cont_Indice_blue].cont = clock();
-                                Blue[Cont_Indice_blue].x = robot.x();
-                                Blue[Cont_Indice_blue].y = robot.y();
+                                Blue[Cont_Indice_blue].x_novo = robot.x();
+                                Blue[Cont_Indice_blue].y_novo = robot.y();
                                 Blue[Cont_Indice_blue].pixel_x = robot.pixel_x();
                                 Blue[Cont_Indice_blue].pixel_y = robot.pixel_y();
-                                Blue[Cont_Indice_blue].orientation = robot.orientation();
                                 Blue[Cont_Indice_blue].height = robot.height();
                                 Blue[Cont_Indice_blue].confidence = robot.confidence();
+                                Blue[Cont_Indice_blue].vx = 0.0;
+                                Blue[Cont_Indice_blue].vy = 0.0;
+                                if(robot.has_orietation()){
+                                    Blue[Cont_Indice_blue].orientation = robot.orientation();
+                                    Blue[Cont_Indice_blue].has_orietation = true;
+                                }
+                                else{
+                                    Blue[Cont_Indice_blue].has_orietation = false;
+                                } 
                                 Cont_Indice_blue++;
                             }
                         
@@ -169,12 +256,15 @@ int main(int argc, char *argv[]){
                     if(Blue[J].Robo_Ativo == 0){
                         // Definir se foi recebido a orientação
                         int has_orientation_valid = 0;
-                        if(robot.has_orientation()){
+                        if(Blue[J].has_orietation == true){
                             has_orientation_valid = 1;
                         }
                         //
+                        if(Blue[J].Identificado == true){
+                            kalman_filter(Blue[J])//argumentos
+                        }
                         printRobotInfo(Blue[J], has_orientation_valid);
-                        kalman_filter(...)//argumentos
+                       
                     }
                 }
                 PERDA(Cont_Indice_blue, Blue)//completar Argumentos
@@ -199,7 +289,19 @@ int main(int argc, char *argv[]){
                                 Yellow[J].orientation = robot.orientation();
                                 Yellow[J].height = robot.height();
                                 Yellow[J].confidence = robot.confidence();
-                                NewID=1;// NewID = 1 -> ID Já identificado       
+                                Yellow[J].dx = (Yellow[J].x_novo - Yellow[J].x)/dt
+                                Yellow[J].dy = (Yellow[J].y_novo - Yellow[J].y)/dt
+                                Yellow[J].Identificado = true;
+                                Yellow[J].Atualizado = true;
+                                Yellow
+                                NewID=1;// NewID = 1 -> ID Já identificado  
+                                if(robot.has_orietation()){
+                                   Yellow[J].orientation = robot.orientation();
+                                   Yellow[J].has_orietation = true;
+                                } 
+                                else{
+                                    Yellow[J].has_orietation = false;
+                                }      
                             }
                         // registrar novo ID 
                             if(NewID==0){
@@ -212,6 +314,15 @@ int main(int argc, char *argv[]){
                                 Yellow[Cont_Indice_yellow].orientation = robot.orientation();
                                 Yellow[Cont_Indice_yellow].height = robot.height();
                                 Yellow[Cont_Indice_yellow].confidence = robot.confidence();
+                                Yellow[Cont_Indice_yellow].dx = 0.0;
+                                Yellow[Cont_Indice_yellow].dy = 0.0;
+                                if(robot.has_orietation()){
+                                   Yellow[J].orientation = robot.orientation();
+                                   Yellow[J].has_orietation = true;
+                                } 
+                                else{
+                                    Yellow[J].has_orietation = false;
+                                } 
                                 Cont_Indice_yellow++;
                             }
                         }
@@ -220,10 +331,20 @@ int main(int argc, char *argv[]){
 
                     }
                 }
-                for(int J=0; J < Cont_Indice_yellow; J++){
+                // definir robos a serem mostrados em tela
+                for(int J=0; J < Cont_Indice_blue; J++){
                     if(Yellow[J].Robo_Ativo == 0){
-                        printRobotInfo(Yellow[J]);
-                        kalman_filter(...)//argumentos
+                        // Definir se foi recebido a orientação
+                        int has_orientation_valid = 0;
+                        if(Yellow[J].has_orietation == true){
+                            has_orientation_valid = 1;
+                        }
+                        //
+                        if(Yellow[J].Identificado == true){
+                            kalman_filter(Yellow[J])//argumentos
+                        }
+                        printRobotInfo(Yellow[J], has_orientation_valid);
+                       
                     }
                 }
                 PERDA(Cont_Indice_yellow, Yellow)//completar Argumentos
