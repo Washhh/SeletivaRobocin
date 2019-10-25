@@ -32,12 +32,12 @@ class Robos{
     public:
         bool Atualizado = false;
         bool Identificado = false;
-        bool has_orietation;
+        bool has_orietation = false;
         double cont     = 0.0;
         int ID_ROBOT    = -1;
         int Robo_Ativo  = 0;
-        double dx;
-        double dy;
+        double vx;
+        double vy;
         float x;
         float y;
         float x_novo;
@@ -82,14 +82,15 @@ void Kalman_filter(Robos Robot){
         // corrigindo meu valor predito anteriormente
         P = A*P*A.transpose() + Q;
         K = P*C.transpose()*(C*P*C.transpose() + R).inverse();
-        //P = (I - K*C)*P;
+        P = (I - K*C)*P;
         X += K * (Y - C*X);
 
         // Salvando
         Saida = C*X; 
 
         //PREDICT
-        X_NEW = A*X; 
+        X_NEW = A*X;
+        X_NEW = C*X_NEW;
         
     }
     else{ // salvar, predict
@@ -152,7 +153,8 @@ int main(int argc, char *argv[]){
     Cont_Indice_blue=0;
     Cont_Indice_yellow=0;
     Robos Blue[8];
-    Robos Yellow[8];
+    std::Vector<Projeto::Robos> Yellow[8];
+    double dt = 1.0/60;
     //................
 
     while(true) {
@@ -205,8 +207,8 @@ int main(int argc, char *argv[]){
                                 Blue[J].pixel_y= robot.pixel_y();
                                 Blue[J].height = robot.height();
                                 Blue[J].confidence = robot.confidence();
-                                Blue[J].vx = (Blue[J].x_novo - Blue[J].x)/dt
-                                Blue[J].vy = (Blue[J].y_novo - Blue[J].y)/dt
+                                Blue[J].vx = (Blue[J].x_novo - Blue[J].x)/dt;
+                                Blue[J].vy = (Blue[J].y_novo - Blue[J].y)/dt;
                                 Blue[J].Identificado = true;
                                 Blue[J].Atualizado = true;
                                 NewID=1;// NewID = 1 -> ID Já identificado  
@@ -218,10 +220,13 @@ int main(int argc, char *argv[]){
                                     Blue[J].has_orietation = false;
                                 }    
                             }
+                        }
                         // registrar novo ID 
                             if(NewID==0){
                                 Blue[Cont_Indice_blue].ID_ROBOT = robot.robot_id();
                                 Blue[Cont_Indice_blue].cont = clock();
+                                Blue[Cont_Indice_blue].x = robot.x();
+                                Blue[Cont_Indice_blue].y = robot.y();
                                 Blue[Cont_Indice_blue].x_novo = robot.x();
                                 Blue[Cont_Indice_blue].y_novo = robot.y();
                                 Blue[Cont_Indice_blue].pixel_x = robot.pixel_x();
@@ -303,6 +308,7 @@ int main(int argc, char *argv[]){
                                     Yellow[J].has_orietation = false;
                                 }      
                             }
+                        }
                         // registrar novo ID 
                             if(NewID==0){
                                 Yellow[Cont_Indice_yellow].ID_ROBOT = robot.robot_id();
@@ -330,7 +336,7 @@ int main(int argc, char *argv[]){
                         printf("-Robot(B) (%2d/%2d): ",i+1, robots_yellow_n);
 
                     }
-                }
+                
                 // definir robos a serem mostrados em tela
                 for(int J=0; J < Cont_Indice_blue; J++){
                     if(Yellow[J].Robo_Ativo == 0){
