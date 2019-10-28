@@ -21,7 +21,7 @@
 #include "pb/grSim_Commands.pb.h"
 #include "pb/grSim_Replacement.pb.h"
 #include <iostream>
-#include "Projeto.hpp"
+#include "Robos.hpp"
 #include <Eigen/Dense>
 
 
@@ -82,11 +82,16 @@ int main(int argc, char *argv[]){
                             
                         if(robot.robot_id >= Cont_Indice_blue ){
                             Blue[Cont_Indice_blue] = new Robos(robot);
+                            Cont_Indice_blue++;
                         }
                         else{
                             bool end = false;
-                            for(int J=0; J <Cont_Indice_blue && !end; J++){
+                            for(int J=0; J < Cont_Indice_blue && !end; J++){
                                 end = Blue[J].Verificar(robot);
+                            }
+                            if(!end){
+                                Blue[Cont_Indice_blue] = new Robos(robot);
+                                Cont_Indice_blue++;
                             }
                         }
                         
@@ -130,6 +135,10 @@ int main(int argc, char *argv[]){
                             bool end = false;
                             for(int J=0; J <Cont_Indice_yellow && !end; J++){
                                 end = Yellow[J].Verificar(robot);
+                            }
+                            if(!end){
+                                Yellow[Cont_Indice_yellow] = new Robos(robot);
+                                Cont_Indice_yellow++;
                             }
                         }   
                     }
