@@ -81,7 +81,9 @@ void Robos::set_robot(SSL_DetectionRobot &robot){
         this.has_orietation = false;
     }
 }
-
+bool Robos::ATUALIZADO(){
+    return Atualizado;
+}
 bool Robos::Verificar(SSL_DetectionRobot &robot){
     
     if(Robot_ID(robot.robot_id())){
@@ -171,4 +173,21 @@ void Robos::printRobotInfo() {
         printf("ANGLE=%6.3f ",this.orientation);
     }
     printf("RAW=<%8.2f,%8.2f>\n",this.pixel_x,this.pixel_y);
+}
+void Robos::Iniciar_Ruido(){
+    Ruido = new Ruido(); // verificar se está certo
+}
+void Robos::Filtro_Ruido(){
+    if(Ruido.Filtro_Ruido()){
+        Valido = true;  
+    }
+}
+bool Robos::VALIDO(){
+    return Valido;
+}
+void Robos::SET_OFF_RUIDO(){
+    Ruido.Filtro_OFF();
+}
+bool Robos::Ruido_Inicializado(){
+    return Ruido.Inicializado();
 }

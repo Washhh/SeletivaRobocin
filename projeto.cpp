@@ -51,21 +51,30 @@ int main(int argc, char *argv[]){
 
                 //loop de verificações e manipulação robos azuis
                 for (int i = 0; i < robots_blue_n; i++) {
+                    int aux;
                     SSL_DetectionRobot robot = detection.robots_blue(i);
                     if (robot.has_robot_id()) {
-                            
+                        //Se for novo ID
                         if(robot.robot_id >= Cont_Indice_blue ){
                             Blue[Cont_Indice_blue] = new Robos(robot);
+                            Blue[Cont_Indice_blue].Iniciar_Ruido();
                             Cont_Indice_blue++;
                         }
-                        else{
+                        else{ // Verificando a qual robo pertence o ID
                             bool end = false;
-                            for(int J=0; J < Cont_Indice_blue && !end; J++){
+                            for(int J=0; J < Cont_Indice_blue && !end; J++){ // Se o ID já existe e se pertence ao intervalo de robos
                                 end = Blue[J].Verificar(robot);
+                                aux = J;
                             }
-                            if(!end){
+                            if(!end){ // caso o ID existe mas seu ID é menor que o Cont e n está na lista
                                 Blue[Cont_Indice_blue] = new Robos(robot);
+                                Blue[Cont_Indice_blue].Iniciar_Ruido();
                                 Cont_Indice_blue++;
+                            }
+                            else{// Verificar se devo manter ou resetar o contador do ruido
+                                if(!Blue[aux].Ruido_Inicializado()){
+                                    Blue[aux].Iniciar_Ruido();
+                                }
                             }
                         }
                         
@@ -77,13 +86,27 @@ int main(int argc, char *argv[]){
                 
                 // definir robos a serem mostrados em tela
                 for(int J=0; J < Cont_Indice_blue; J++){
-                    if(Blue[J].ATIVO()){
+                    Blue[J].Filtro_Ruido();
+                    if(Blue[J].ATIVO() && Blue[J].VALIDO){
                         std::thread T1(Blue[J].kalman());
                         std::thread T2(Blue[J].Perda());
                         T1.join();
                         Blue[J].printRobotInfo();
 
                     }
+                    else if(Blue[J].ATIVO()){
+
+                        if(Blue[J].ATUALIZADO()){
+
+                            std::thread T1(Blue[J].kalman());
+                            T1.join();
+                
+                        }
+                        else{
+                            Blue[J].SET_OFF_RUIDO();
+                        }
+                    }
+                    
                 
                     if(Blue[J].getx() <= 0){
                         grSim_client.sendCommand(1.0, J);
