@@ -66,11 +66,33 @@ class Robos{
 
 };
 Robos::Robos(SSL_DetectionRobot &robot){
-    this.P << 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-    this.A << 1, 0, dt, 0, 0, 1, 0, dt, 0, 0, 1, 0, 0, 0, 0, 1;
-    this.C << 1, 0, 0, 0, 0, 1, 0, 0;
-    this.Q << .05, .05, .0, .05,.05, .05, .0, .05,.05, .05, .0, .05,.05, .05, .0, .05;
-    this.R << 5, 5, 5, 5;
+    
+    this.P << 
+    0, 0, 0, 0, 
+    0, 0, 0, 0, 
+    0, 0, 0, 0, 
+    0, 0, 0, 0;
+
+    this.A << 
+    1, 0, dt, 0, 
+    0, 1, 0, dt, 
+    0, 0, 1, 0, 
+    0, 0, 0, 1;
+
+    this.C << 
+    1, 0, 0, 0, 
+    0, 1, 0, 0;
+
+    this.Q << 
+    .05, .05, .0, .05,
+    .05, .05, .0, .05,
+    .05, .05, .0, .05,
+    .05, .05, .0, .05;
+
+    this.R <<
+     5, 5,
+     5, 5;
+
     this.ID_ROBOT = robot.robot_id();
     this.cont = clock();
     this.x = robot.x();
@@ -94,7 +116,13 @@ Robos::Robos(SSL_DetectionRobot &robot){
 void Robos::set_robot(SSL_DetectionRobot &robot){
     if(this.Robo_Ativo == 1){
         this.Robo_Ativo = 0;
-        this.P << 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+        
+        this.P <<
+        0, 0, 0, 0, 
+        0, 0, 0, 0, 
+        0, 0, 0, 0, 
+        0, 0, 0, 0;
+
         this.x = robot.x();
         this.y = robot.y();
     }

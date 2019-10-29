@@ -20,66 +20,10 @@
 #include "pb/grSim_Packet.pb.h"
 #include "pb/grSim_Commands.pb.h"
 #include "pb/grSim_Replacement.pb.h"
+#include <iostream>
+#include "Robos.hpp"
+#include <Eigen/Dense>
 
-#define TempoLimite 0.3
-//classe dos Robos
-class Robos{
-    public:
-        double cont=0.0;
-        int ID_ROBOT=0;
-        int Robo_Ativo=0;
-        float x;
-        float y;
-        float pixel_x;
-        float pixel_y;
-};
-//................
-//FIltro de perda
-void PERDA_BLUE(int Cont_Indice_blue...){
-
-        for(int x = 0; x < Cont_Indice_blue; x++){
-                
-            //cout << "tempo de " << x << " : " << ((clock() - vetor[x].contador)/CLOCKS_PER_SEC) << endl;
-            //cout << endl, endl;
-                
-            if(((clock() - Blue[x].cont)/CLOCKS_PER_SEC) >= TempoLimite){
-                cout << "o robo Azul de ID " << Blue[x].ID_ROBOT << " deu perda" << endl;
-                Blue[x].Robo_Ativo = 1;
-            }
-        }
-
-    
-
-}
-void PERDA_YELLOW(int Cont_Indice_yellow...){
-
-        for(int x = 0; x < Cont_Indice_yellow; x++){
-                
-            //cout << "tempo de " << x << " : " << ((clock() - vetor[x].contador)/CLOCKS_PER_SEC) << endl;
-            //cout << endl, endl;
-                
-            if(((clock() - Yellow[x].cont)/CLOCKS_PER_SEC) >= TempoLimite){
-                cout << "o robo Amarelo de ID " << Yellow[x].ID_ROBOT << " deu perda" << endl;
-                Yellow[x].Robo_Ativo = 1;
-            }
-        }
-
-    
-}
-//.......................................
-void printRobotInfo(const SSL_DetectionRobot & robot) {
-    printf("CONF=%4.2f ", robot.confidence());
-    if (robot.has_robot_id()) {
-        printf("ID=%3d ",robot.robot_id());
-    } 
-    printf(" HEIGHT=%6.2f POS=<%9.2f,%9.2f> ",robot.height(),robot.x(),robot.y());
-    if (robot.has_orientation()) {
-        printf("ANGLE=%6.3f ",robot.orientation());
-    } else {
-        printf("ANGLE=N/A    ");
-    }
-    printf("RAW=<%8.2f,%8.2f>\n",robot.pixel_x(),robot.pixel_y());
-}
 
 int main(int argc, char *argv[]){
     (void)argc;
@@ -89,12 +33,14 @@ int main(int argc, char *argv[]){
     SSL_WrapperPacket packet;
 
     GrSim_Client grSim_client;
-    //Declarando o vetor de Robos
+
+    //Declarando os parametros utilizados nas manipulações de dados
     Cont_Indice_blue=0;
     Cont_Indice_yellow=0;
-    Robos Blue[5];
-    Robos Yellow[5];
-    //................
+    std::Vector<Robos> Blue[8];
+    std::Vector<Robos> Yellow[8];
+  
+
     while(true) {
         if (client.receive(packet)) {
             printf("-----Received Wrapper Packet---------------------------------------------\n");
@@ -133,82 +79,88 @@ int main(int argc, char *argv[]){
                 for (int i = 0; i < robots_blue_n; i++) {
                     SSL_DetectionRobot robot = detection.robots_blue(i);
                     if (robot.has_robot_id()) {
-                        NewID=0; // NewID = 0 -> Novo ID
-
-                        for(int J=0; J <Cont_Indice_blue; J++){
-                            if(Blue[J].ID_ROBOT == robot.robot_id()){
-                                Blue[J].cont= clock();
-                                Blue[J].Robo_Ativo = 0;
-                                NewID=1;// NewID = 1 -> ID Já identificado       
+                            
+                        if(robot.robot_id >= Cont_Indice_blue ){
+                            Blue[Cont_Indice_blue] = new Robos(robot);
+                            Cont_Indice_blue++;
+                        }
+                        else{
+                            bool end = false;
+                            for(int J=0; J < Cont_Indice_blue && !end; J++){
+                                end = Blue[J].Verificar(robot);
                             }
-                        // registrar novo ID 
-                            if(NewID==0){
-                                Blue[Cont_Indice_blue].ID_ROBOT = robot.robot_id();
-                                Blue[Cont_Indice_blue].cont = clock();
-                                Blue[Cont_Indice_blue].x = robot.x;
-                                Blue[Cont_Indice_blue].y = robot.y;
-                                Blue[Cont_Indice_blue].pixel_x = robot.pixel_x;
-                                Blue[Cont_Indice_blue].pixel_y = robot.pixel_y;
+                            if(!end){
+                                Blue[Cont_Indice_blue] = new Robos(robot);
                                 Cont_Indice_blue++;
                             }
-                        
-                            if(robot.x() <= 0){
-                                grSim_client.sendCommand(1.0, i);
-                            }else{
-                                grSim_client.sendCommand(-1.0, i);
-                            }
                         }
+                        
+                    }
 
                         printf("-Robot(B) (%2d/%2d): ",i+1, robots_blue_n);
 
-                    }
                 }
+                
+                // definir robos a serem mostrados em tela
                 for(int J=0; J < Cont_Indice_blue; J++){
-                    if(Blue[J].Robo_Ativo == 0){
-                        printRobotInfo(Blue[J]);
-                        kalman_filter(...)//argumentos
+                    if(Blue[J].ATIVO()){
+                        std::thread T1(Blue[J].kalman());
+                        std::thread T2(Blue[J].Perda());
+                        T1.join();
+                        Blue[J].printRobotInfo();
+
+                    }
+                
+                    if(Blue[J].getx() <= 0){
+                        grSim_client.sendCommand(1.0, J);
+                    }else{
+                        grSim_client.sendCommand(-1.0, J);
                     }
                 }
-                PERDA_BLUE(Cont_Indice_blue...)//completar Argumentos
+
+                
                 //....................................................
 
                 //Yellow robot info:
 
                 //loop de verificações e manipulação robos amarelos
                 for (int i = 0; i < robots_yellow_n; i++) {
-                    SSL_DetectionRobot robot = detection.robots_yellow(i);
+                    SSL_DetectionRobot robot = detection.robots_Yellow(i);
                     if (robot.has_robot_id()) {
-                        NewID=0; // NewID = 0 -> Novo ID
-
-                        for(int J=0; J <Cont_Indice_yellow; J++){
-                            if(Yellow[J].ID_ROBOT == robot.robot_id()){
-                                Yellow[J].cont= clock();
-                                Yellow[J].Robo_Ativo = 0;
-                                NewID=1;// NewID = 1 -> ID Já identificado       
+                            
+                        if(robot.robot_id >= Cont_Indice_yellow ){
+                            Yellow[Cont_Indice_yellow] = new Robos(robot);
+                        }
+                        else{
+                            bool end = false;
+                            for(int J=0; J <Cont_Indice_yellow && !end; J++){
+                                end = Yellow[J].Verificar(robot);
                             }
-                        // registrar novo ID 
-                            if(NewID==0){
-                                Yellow[Cont_Indice_yellow].ID_ROBOT = robot.robot_id();
-                                Yellow[Cont_Indice_yellow].cont = clock();
-                                Yellow[Cont_Indice_yellow].x = robot.x;
-                                Yellow[Cont_Indice_yellow].y = robot.y;
-                                Yellow[Cont_Indice_yellow].pixel_x = robot.pixel_x;
-                                Yellow[Cont_Indice_yellow].pixel_y = robot.pixel_y;
+                            if(!end){
+                                Yellow[Cont_Indice_yellow] = new Robos(robot);
                                 Cont_Indice_yellow++;
                             }
-                        }
-
-                        printf("-Robot(B) (%2d/%2d): ",i+1, robots_yellow_n);
-
+                        }   
                     }
+                        printf("-Robot(B) (%2d/%2d): ",i+1, robots_Yellow_n);
+
                 }
+                
+                // definir robos a serem mostrados em tela
                 for(int J=0; J < Cont_Indice_yellow; J++){
-                    if(Yellow[J].Robo_Ativo == 0){
-                        printRobotInfo(Yellow[J]);
-                        kalman_filter(...)//argumentos
+                    if(Yellow[J].ATIVO()){
+                        std::thread T1(Yellow[J].kalman());
+                        std::thread T2(Yellow[J].Perda());
+                        T1.join();
+                        Yellow[J].printRobotInfo();
+
+                    }
+                    if(Yellow[J].getx() <= 0){
+                        grSim_client.sendCommand(1.0, J);
+                    }else{
+                        grSim_client.sendCommand(-1.0, J);
                     }
                 }
-                PERDA_YELLOW(Cont_Indice_blue...)//completar Argumentos
                 //....................................................
 
             //see if packet contains geometry data:
