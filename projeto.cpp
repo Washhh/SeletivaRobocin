@@ -11,9 +11,10 @@ int main(int argc, char *argv[]){
     //Declarando os parametros utilizados nas manipulações de dados
     Cont_Indice_blue=0;
     Cont_Indice_yellow=0;
-    std::Vector<Robos> Blue[8];
-    std::Vector<Robos> Yellow[8];
-  
+    Cont_Indice_Ball=0;
+    std::Vector<Robos> Blue[20];
+    std::Vector<Robos> Yellow[20];
+    std::Vector<Ball> Ball[20];
 
     while(true) {
         if (client.receive(packet)) {
@@ -37,16 +38,51 @@ int main(int argc, char *argv[]){
 
                 //Ball info:
                 for (int i = 0; i < balls_n; i++) {
+                    int aux;
                     SSL_DetectionBall ball = detection.balls(i);
-                    printf("-Ball (%2d/%2d): CONF=%4.2f POS=<%9.2f,%9.2f> ", i+1, balls_n, ball.confidence(),ball.x(),ball.y());
-                    if (ball.has_z()) {
-                        printf("Z=%7.2f ",ball.z());
-                    } else {
-                        printf("Z=N/A   ");
+                    if(ball_has_area()){
+                        bool end = false;
+                        for(int J=0; J < Cont_Indice_Ball && !end; J++){
+                            end = Ball[J].Verificar(ball);
+                            aux = J;
+                        }
+                        if(!end){
+                            Ball[Cont_Indice_Ball] = new Ball(ball);
+                            Ball[Cont_Indice_Ball].Iniciar_Ruido();
+                            Cont_Indice_Ball++;
+                        }
+                        else{
+                            if(!Ball[aux].Ruido_Inicializado()){
+                                Ball[aux].Iniciar_Ruido();
+                            }
+                        }
                     }
-                    printf("RAW=<%8.2f,%8.2f>\n",ball.pixel_x(),ball.pixel_y());
                 }
+                // definir as bolas a serem mostradas em tela
+                for(int J=0; J < Cont_Indice_Ball; J++){
+                    Ball[J].Filtro_Ruido();
+                    if(Ball[J].get_Ativo() && Ball[J].get_Valido){// Se a bola estiver Ativa e já tiver sido validada, ela começa a ser mostrada em tela e ter o filtro de perda ativo
+                        std::thread T1(Ball[J].kalman());
+                        std::thread T2(Ball[J].Perda());
+                        T1.join();
+                        Ball[J].printRobotInfo();
 
+                    }
+                    else if(Ball[J].get_Ativo()){ /*  Sa bola  estiver Ativa porém n tiver sido validada ainda, é verificado se ela foi atualizada nesse momento, se sim,
+                     ruido continua e é calculado sua próxima posição pelo filtro de kalman, se não, 
+                     o filtro de ruido é parado e essa bola é esquecida até que seja encontrada novamente */
+
+                        if(Ball[J].get_Atualizado()){
+
+                            std::thread T1(Ball[J].kalman());
+                            T1.join();
+                
+                        }
+                        else{
+                            Ball[J].SET_OFF_RUIDO();
+                        }
+                    }
+                }
                 //Blue robot info:
 
                 //loop de verificações e manipulação robos azuis
@@ -77,26 +113,24 @@ int main(int argc, char *argv[]){
                                 }
                             }
                         }
-                        
                     }
-
-                        printf("-Robot(B) (%2d/%2d): ",i+1, robots_blue_n);
-
                 }
                 
                 // definir robos a serem mostrados em tela
                 for(int J=0; J < Cont_Indice_blue; J++){
                     Blue[J].Filtro_Ruido();
-                    if(Blue[J].ATIVO() && Blue[J].VALIDO){
+                    if(Blue[J].get_Ativo() && Blue[J].get_Valido){// Se o robo estiver Ativo e já tiver sido validado, ele começa a ser mostrado em tela e ter o filtro de perda ativo
                         std::thread T1(Blue[J].kalman());
                         std::thread T2(Blue[J].Perda());
                         T1.join();
                         Blue[J].printRobotInfo();
 
                     }
-                    else if(Blue[J].ATIVO()){
+                    else if(Blue[J].get_Ativo()){ /*  Se o robo estiver Ativo porém n tiver sido validado ainda, é verificado se ele foi atualizado nesse momento, se sim,
+                     ruido continua e é calculado sua próxima posição pelo filtro de kalman, se não, 
+                     o filtro de ruido é parado e esse Robo é esquecido até que seja encontrado novamente */
 
-                        if(Blue[J].ATUALIZADO()){
+                        if(Blue[J].get_Atualizado()){
 
                             std::thread T1(Blue[J].kalman());
                             T1.join();
@@ -106,8 +140,7 @@ int main(int argc, char *argv[]){
                             Blue[J].SET_OFF_RUIDO();
                         }
                     }
-                    
-                
+
                     if(Blue[J].getx() <= 0){
                         grSim_client.sendCommand(1.0, J);
                     }else{
@@ -122,36 +155,64 @@ int main(int argc, char *argv[]){
 
                 //loop de verificações e manipulação robos amarelos
                 for (int i = 0; i < robots_yellow_n; i++) {
-                    SSL_DetectionRobot robot = detection.robots_Yellow(i);
+                    int aux;
+                    SSL_DetectionRobot robot = detection.robots_yellow(i);
                     if (robot.has_robot_id()) {
-                            
+                        //Se for novo ID
                         if(robot.robot_id >= Cont_Indice_yellow ){
                             Yellow[Cont_Indice_yellow] = new Robos(robot);
+                            Yellow[Cont_Indice_yellow].Iniciar_Ruido();
+                            Cont_Indice_yellow++;
                         }
-                        else{
+                        else{ // Verificando a qual robo pertence o ID
                             bool end = false;
-                            for(int J=0; J <Cont_Indice_yellow && !end; J++){
+                            for(int J=0; J < Cont_Indice_yellow && !end; J++){ // Se o ID já existe e se pertence ao intervalo de robos
                                 end = Yellow[J].Verificar(robot);
+                                aux = J;
                             }
-                            if(!end){
+                            if(!end){ // caso o ID existe mas seu ID é menor que o Cont e n está na lista
                                 Yellow[Cont_Indice_yellow] = new Robos(robot);
+                                Yellow[Cont_Indice_yellow].Iniciar_Ruido();
                                 Cont_Indice_yellow++;
                             }
-                        }   
+                            else{// Verificar se devo manter ou resetar o contador do ruido
+                                if(!Yellow[aux].Ruido_Inicializado()){
+                                    Yellow[aux].Iniciar_Ruido();
+                                }
+                            }
+                        }
+                        
                     }
+
                         printf("-Robot(B) (%2d/%2d): ",i+1, robots_Yellow_n);
 
                 }
                 
                 // definir robos a serem mostrados em tela
                 for(int J=0; J < Cont_Indice_yellow; J++){
-                    if(Yellow[J].ATIVO()){
+                    Yellow[J].Filtro_Ruido();
+                    if(Yellow[J].get_Ativo() && Yellow[J].get_Valido){// Se o robo estiver Ativo e já tiver sido validado, ele começa a ser mostrado em tela e ter o filtro de perda ativo
                         std::thread T1(Yellow[J].kalman());
                         std::thread T2(Yellow[J].Perda());
                         T1.join();
                         Yellow[J].printRobotInfo();
 
                     }
+                    else if(Yellow[J].get_Ativo()){ /*  Se o robo estiver Ativo porém n tiver sido validado ainda, é verificado se ele foi atualizado nesse momento, se sim,
+                     ruido continua e é calculado sua próxima posição pelo filtro de kalman, se não, 
+                     o filtro de ruido é parado e esse Robo é esquecido até que seja encontrado novamente */
+
+                        if(Yellow[J].get_Atualizado()){
+
+                            std::thread T1(Yellow[J].kalman());
+                            T1.join();
+                
+                        }
+                        else{
+                            Yellow[J].SET_OFF_RUIDO();
+                        }
+                    }
+                    
                     if(Yellow[J].getx() <= 0){
                         grSim_client.sendCommand(1.0, J);
                     }else{
