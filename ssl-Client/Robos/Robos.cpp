@@ -171,7 +171,7 @@ void Robos::kalman(){ // Método para execução do lindo e maravilho filtro de 
 
 void Robos::Perda(){ // Método para a execução do filtro de Perda que define se um robo está ou não no tempo limite de verificação, passando desse tempo limite, ele é setado como inválido
                 
-    if(((clock() - this.cont)/CLOCKS_PER_SEC) >= TempoLimite){
+    if((((double)clock() - this.cont)/CLOCKS_PER_SEC) >= TempoLimite){
         cout << "o robo Azul de ID " << this.ID_ROBOT << " deu perda" << endl;
         this.Robo_Ativo = 1;
     }

@@ -1,5 +1,5 @@
 #include "Ball.h"
-#define TempoLimite 300.0
+#define TempoLimite 0.3
 
 Ball::Ball(SSL_DetectionBall &ball){ // Construtor
     
@@ -169,7 +169,7 @@ void Ball::kalman(){ // Método para execução do lindo e maravilho filtro de k
 
 void Ball::Perda(){ // Método para a execução do filtro de Perda que define se uma bola está ou não no tempo limite de verificação, passando desse tempo limite, ela é setada como inválida
                 
-    if(((double)(clock() - this.cont)/100.0) >= TempoLimite){
+    if(((double)(clock() - this.cont)/CLOCKS_PER_SEC) >= TempoLimite){
         cout << "A bola de Area " << this.Area_Bola << " deu perda" << endl;
         this.Bola_Ativa = 1;
     }

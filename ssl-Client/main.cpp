@@ -61,7 +61,7 @@ int main(int argc, char *argv[]){
                     }
                 }
                 // definir as bolas a serem mostradas em tela
-                bool Bola_Unica = false;
+                bool Bola_Unica = false; // Váriavel que vai garantir que apenas 1 bola vai ser mostrada
                 for(int J=0; J < Cont_Indice_Ball; J++){
                     Ball[J].Filtro_Ruido();
                     if(Ball[J].get_Ativo() && Ball[J].get_Valido && !Bola_Unica){// Se a bola estiver Ativa e já tiver sido validada, ela começa a ser mostrada em tela e ter o filtro de perda ativo
@@ -106,12 +106,12 @@ int main(int argc, char *argv[]){
                                 end = Blue[J].Verificar(robot);
                                 aux = J;
                             }
-                            if(!end && Cont_Indice_Ball < 20){ // caso o ID existe mas seu ID é menor que o Cont e n está na lista
+                            if(!end && Cont_Indice_blue < 20){ // caso o ID existe mas seu ID é menor que o Cont e n está na lista
                                 Blue[Cont_Indice_blue] = new Robos(robot);
                                 Blue[Cont_Indice_blue].Iniciar_Ruido();
                                 Cont_Indice_blue++;
                             }
-                            else if(Cont_Indice_Ball < 20) {// Verificar se devo manter ou resetar o contador do ruido
+                            else if(Cont_Indice_blue < 20) {// Verificar se devo manter ou resetar o contador do ruido
                                 if(!Blue[aux].Ruido_Inicializado()){
                                     Blue[aux].Iniciar_Ruido();
                                 }
@@ -174,12 +174,12 @@ int main(int argc, char *argv[]){
                                 end = Yellow[J].Verificar(robot);
                                 aux = J;
                             }
-                            if(!end && Cont_Indice_Ball < 20 ){ // caso o ID existe mas seu ID é menor que o Cont e n está na lista
+                            if(!end && Cont_Indice_yellow < 20 ){ // caso o ID existe mas seu ID é menor que o Cont e n está na lista
                                 Yellow[Cont_Indice_yellow] = new Robos(robot);
                                 Yellow[Cont_Indice_yellow].Iniciar_Ruido();
                                 Cont_Indice_yellow++;
                             }
-                            else if(Cont_Indice_Ball < 20){// Verificar se devo manter ou resetar o contador do ruido
+                            else if(Cont_Indice_yellow < 20){// Verificar se devo manter ou resetar o contador do ruido
                                 if(!Yellow[aux].Ruido_Inicializado()){
                                     Yellow[aux].Iniciar_Ruido();
                                 }

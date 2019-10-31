@@ -18,8 +18,8 @@ class Robos{
         void Perda(); // Executa Perda para verificar se o robo está " sumido " a muito tempo e o desativa caso afirmativo
         void printRobotInfo(); // Mostra as informações do Robo
         void Iniciar_Ruido(); // Inicia o filtro de Ruido para verificar se o Robo é válido
-        void Filtro_Ruido(); // Seta o valor de Valido dependendo se o filtro acabou de executar e o robo se manteve, assim ele é dito como Valido
-        void SET_OFF_RUIDO(); // Se o robo foi perdido enquanto o Ruido é executado, seta para não inicializado para que caso seja encontrado novamente seja setado novamente para 
+        void Filtro_Ruido(); // Seta o valor de Valido dependendo se o filtro acabou de executar e o robo se manteve visível, assim ele é dito como Valido
+        void SET_OFF_RUIDO(); // Se o robo foi perdido enquanto o Ruido é executado, seta para não inicializado para que caso seja encontrado novamente seja setado novamente para inicializado
         bool Ruido_Inicializado(); // Retorna se o Filtro de Ruido está sendo executado
        
 
