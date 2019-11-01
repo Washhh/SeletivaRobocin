@@ -17,7 +17,7 @@ int main(int argc, char *argv[]){
     Cont_Indice_Ball=0;
     std::Vector<Robos> Blue[20];
     std::Vector<Robos> Yellow[20];
-    std::Vector<Ball> Ball[20];
+    std::Vector<Ball> Bola[20];
 
     while(true) {
         if (client.receive(packet)) {
@@ -46,17 +46,17 @@ int main(int argc, char *argv[]){
                     if(ball_has_area()){
                         bool end = false;
                         for(int J=0; J < Cont_Indice_Ball && !end; J++){
-                            end = Ball[J].Verificar(ball);
+                            end = Bola[J].Verificar(ball);
                             aux = J;
                         }
                         if(!end && Cont_Indice_Ball < 20){
-                            Ball[Cont_Indice_Ball] = new Ball(ball);
-                            Ball[Cont_Indice_Ball].Iniciar_Ruido();
+                            Bola[Cont_Indice_Ball] = new Ball(ball);
+                            Bola[Cont_Indice_Ball].Iniciar_Ruido();
                             Cont_Indice_Ball++;
                         }
                         else if(Cont_Indice_Ball < 20){
-                            if(!Ball[aux].Ruido_Inicializado()){
-                                Ball[aux].Iniciar_Ruido();
+                            if(!Bola[aux].Ruido_Inicializado()){
+                                Bola[aux].Iniciar_Ruido();
                             }
                         }
                     }
@@ -64,27 +64,28 @@ int main(int argc, char *argv[]){
                 // definir as bolas a serem mostradas em tela
                 bool Bola_Unica = false; // Váriavel que vai garantir que apenas 1 bola vai ser mostrada
                 for(int J=0; J < Cont_Indice_Ball; J++){
-                    Ball[J].Filtro_Ruido();
-                    if(Ball[J].get_Ativo() && Ball[J].get_Valido && !Bola_Unica){// Se a bola estiver Ativa e já tiver sido validada, ela começa a ser mostrada em tela e ter o filtro de perda ativo
+                    Bola[J].Filtro_Ruido();
+                    if(Bola[J].get_Ativo() && Bola[J].get_Valido && !Bola_Unica){// Se a bola estiver Ativa e já tiver sido validada, ela começa a ser mostrada em tela e ter o filtro de perda ativo
                         Bola_Unica = true;
-                        std::thread T1(Ball[J].kalman());
-                        std::thread T2(Ball[J].Perda());
+                        std::thread T1(Bola[J].kalman());
+                        std::thread T2(Bola[J].Perda());
                         T1.join();
-                        std::thread T3(Ball[J].printRobotInfo());
+                        std::thread T3(Bola[J].printRobotInfo());
 
                     }
-                    else if(Ball[J].get_Ativo()){ /*  Sa bola  estiver Ativa porém n tiver sido validada ainda, é verificado se ela foi atualizada nesse momento, se sim,
+                    else if(Bola[J].get_Ativo()){ /*  Sa bola  estiver Ativa porém n tiver sido validada ainda, é verificado se ela foi atualizada nesse momento, se sim,
                      ruido continua e é calculado sua próxima posição pelo filtro de kalman, se não, 
                      o filtro de ruido é parado e essa bola é esquecida até que seja encontrada novamente */
 
-                        if(Ball[J].get_Atualizado()){
+                        if(Bola[J].get_Atualizado()){
 
-                            std::thread T1(Ball[J].kalman());
+                            std::thread T1(Bola[J].kalman());
                             T1.join();
                 
                         }
                         else{
-                            Ball[J].SET_OFF_RUIDO();
+                            Bola[J].SET_OFF_RUIDO();
+                            Bola[J].set_off_Ativo();
                         }
                     }
                 }
@@ -143,6 +144,7 @@ int main(int argc, char *argv[]){
                         }
                         else{
                             Blue[J].SET_OFF_RUIDO();
+                            Blue[J].set_off_Ativo();
                         }
                     }
 
@@ -215,6 +217,7 @@ int main(int argc, char *argv[]){
                         }
                         else{
                             Yellow[J].SET_OFF_RUIDO();
+                            Yellow[J].set_off_Ativo();
                         }
                     }
                     

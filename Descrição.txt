@@ -1,0 +1,28 @@
+PROJETO SOFTWARE - SELETIVA ROBÔCIN 2019
+
+	Minha proposta para resolução do problema proposto pelo robôcin é a utlização dos filtros
+de Perda, Ruído e Kalman.
+
+	O filtro de Perda é um filtro simples que consiste em dar a cada robô e bola um tempo baseado 
+em quando eles são encontrados e os atualiza sempre que encontrados novamente, caso um robô ou bola 
+fique "invisível" para a visão por um determinado tempo ele é tratado como desativado enquanto a visão 
+não conseguir encontra-ló.
+
+	O filtro de Ruído assim como o filtro de Perda, trabalha com o tempo e da ao robô e bola um 
+tempo baseado em quando ele foi encontrado pela visão, só que agora esse tempo é atribuido na primeira 
+vez em que o robô ou bola é encontrado para que seja executada uma verificação a cada pacote, essa
+verificação consiste em analisar se o robô ou bola ficou visível de forma constante por um determinado
+tempo para garantir que o mesmo não é um ruído, caso o elemento analisado passe na análise ele começa
+a ser tratado como um elemento válido, no entanto enquanto é feita a validação, o elemento passa por
+outro tratamento, o filtro de kalman.
+
+	O filtro de Kalman é um método matemático que utiliza de medições de grandezas realizadas ao longo 
+do tempo para gerar um resultado que tenda a se aproxoximar do valor real da grandeza. Utilizando esse filtro 
+é possível calcular a posição em que o robô ou bola vai está em um próximo estádo de tempo, caso o mesmo não
+seja encontrado pela visão em algum momento, pelo filtro de kalman uma ótima suposição de onde esse elemento
+se encontra já foi calculada no estado anterior de execução. O filtro de Kalman trabalha com predição e correção
+caso no instante analisado ele receba as informações do elemento analisado, ele usa essas informações para
+corrigir e melhorar a estimativa que ele calculou anteriormente, garantindo uma medição mais precisa. O filtro
+de Kalman é usado em várias aplicações e no caso para esse projeto, foi usado para predizer, corrigir e garantir
+uma melhor utilização dos dados recebidos.
+	

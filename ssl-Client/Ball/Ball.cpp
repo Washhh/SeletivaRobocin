@@ -119,6 +119,9 @@ float Ball::getx(){ // Método para retorno da posição x da bola
 float Ball::gety(){ // Método para retorno da posição y da bola
     return this.y_novo;
 }
+void Ball::set_off_Ativo(){// Método para deixar a bola inativa
+    this.Bola_Ativa = 1;
+}
 void Ball::kalman(){ // Método para execução do lindo e maravilho filtro de kalman
 
     Eigen::MatrixXd I

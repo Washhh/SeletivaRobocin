@@ -121,6 +121,9 @@ float Robos::getx(){ // Método para retorno da posição x do robo
 float Robos::gety(){ // Método para retorno da posição y do robo
     return this.y_novo;
 }
+void Robos::set_off_Ativo(){// Método para deixar o Robô inativo
+    this.Robo_Ativo = 1;
+}
 void Robos::kalman(){ // Método para execução do lindo e maravilho filtro de kalman
 
     Eigen::MatrixXd I

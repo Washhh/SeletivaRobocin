@@ -14,6 +14,7 @@ class Ball{
         bool get_Valido();  // Retorna o estado do boleano Valido
         float getx(); // Retorna o valor de x
         float gety(); // Retorna o valor de y
+        void set_off_Ativo(); // Seta a bola para inativo
         void kalman(); // Executa o filtro de kalman com as coordenadas da bola
         void Perda(); // Executa o filtro de perda para verificar se a bola está "sumida" a muito tempo e desativa caso afirmativo
         void printBallInfo(); //Mostra as informações da bola
