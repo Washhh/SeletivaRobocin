@@ -1,4 +1,5 @@
 #include "Bibliotecas.h"
+#include <QtNetwork>
 #include "Robos/Robos.h"
 #include "Ball/Ball.h"
 int main(int argc, char *argv[]){
@@ -69,7 +70,7 @@ int main(int argc, char *argv[]){
                         std::thread T1(Ball[J].kalman());
                         std::thread T2(Ball[J].Perda());
                         T1.join();
-                        Ball[J].printRobotInfo();
+                        std::thread T3(Ball[J].printRobotInfo());
 
                     }
                     else if(Ball[J].get_Ativo()){ /*  Sa bola  estiver Ativa porém n tiver sido validada ainda, é verificado se ela foi atualizada nesse momento, se sim,
@@ -127,7 +128,7 @@ int main(int argc, char *argv[]){
                         std::thread T1(Blue[J].kalman());
                         std::thread T2(Blue[J].Perda());
                         T1.join();
-                        Blue[J].printRobotInfo();
+                        std::thread T3(Blue[J].printRobotInfo());
 
                     }
                     else if(Blue[J].get_Ativo()){ /*  Se o robo estiver Ativo porém n tiver sido validado ainda, é verificado se ele foi atualizado nesse momento, se sim,
@@ -199,7 +200,7 @@ int main(int argc, char *argv[]){
                         std::thread T1(Yellow[J].kalman());
                         std::thread T2(Yellow[J].Perda());
                         T1.join();
-                        Yellow[J].printRobotInfo();
+                        std::thread T3(Yellow[J].printRobotInfo());
 
                     }
                     else if(Yellow[J].get_Ativo()){ /*  Se o robo estiver Ativo porém n tiver sido validado ainda, é verificado se ele foi atualizado nesse momento, se sim,

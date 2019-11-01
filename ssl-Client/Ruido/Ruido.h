@@ -14,4 +14,5 @@ class Ruido{
         double tempo; // tempo em que o valor do clock - temporizador tem que sair mair ou igual
         double temporizador; // variável que recebe o valor do clock no momento em que o filtro começa
         bool filtro_inicializado = false; // boelado para saber se o filtro está ou não sendo executado
-}
+};
+#endif
