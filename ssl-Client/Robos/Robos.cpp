@@ -92,7 +92,7 @@ bool Robos::Verificar(SSL_DetectionRobot &robot){ // Método para descobrir se o
 
 bool Robos::Robot_ID(int ID){ // Método que retorna a verificação de igualdade entre o ID recebido e o ID do Robo
     
-    if(ID == ID_ROBOT){
+    if(ID == this.ID_ROBOT){
         return true;
     }
 
@@ -100,7 +100,7 @@ bool Robos::Robot_ID(int ID){ // Método que retorna a verificação de igualdad
 }
 
 bool Robos::get_Atualizado(){ // Método para retorno do estado do Robo, se atualizado ou não
-    return Atualizado;
+    return this.Atualizado;
 }
 
 bool Robos::get_Ativo(){ // Método para retorno do estado do Robo, se ativo ou não
@@ -111,7 +111,7 @@ bool Robos::get_Ativo(){ // Método para retorno do estado do Robo, se ativo ou 
 }
 
 bool Robos::get_Valido(){ // Método para retorno do estado do Robo, se valido ou não
-    return Valido;
+    return this.Valido;
 }
 
 float Robos::getx(){ // Método para retorno da posição x do robo

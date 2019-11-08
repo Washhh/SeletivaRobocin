@@ -89,7 +89,7 @@ bool Ball::Verificar(SSL_DetectionBall &ball){ // Método para descobrir se a á
 }
 
 bool Ball::Ball_Area(int Area){ // Método que retorna a verificação de igualdade entre a área da bola e a área recebida
-    double aux = Area_Bola/Area;
+    double aux = this.Area_Bola/Area;
     if(aux >= 0.95 && aux <= 1.05 ){
         return true;
     }
@@ -98,7 +98,7 @@ bool Ball::Ball_Area(int Area){ // Método que retorna a verificação de iguald
 }
 
 bool Ball::get_Atualizado(){ // Método para retorno do estado da bola, se atualizado ou não
-    return Atualizado;
+    return this.Atualizado;
 }
 
 bool Ball::get_Ativo(){ // Método para retorno do estado da bola, se ativo ou não
@@ -109,7 +109,7 @@ bool Ball::get_Ativo(){ // Método para retorno do estado da bola, se ativo ou n
 }
 
 bool Ball::get_Valido(){ // Método para retorno do estado da bola, se valido ou não
-    return Valido;
+    return this.Valido;
 }
 
 float Ball::getx(){ // Método para retorno da posição x da bola
@@ -194,7 +194,7 @@ void Ball::Iniciar_Ruido(){ // Método que Inicia o filtro de Ruido
 }
 void Ball::Filtro_Ruido(){ // Método que retorna se o filtro terminou ou não 
     if(Ruido.Filtro_Ruido()){
-        Valido = true;  
+        this.Valido = true;  
     }
 }
 

@@ -6,8 +6,8 @@ Ruido::Ruido(){ // Montador do filtro de Ruido
     Contador();
 }
 void Ruido::Contador(){ // Método usado para iniciar as variáveis necessárias para execução e verificação
-    this.temporizador = clock(); 
-    this. filtro_inicializado = true;
+    temporizador = clock(); 
+    filtro_inicializado = true;
 }
 
 void Ruido::Filtro_OFF(){ // Método usado para cancelar a verificação do filtro, pois ele não vai mais está inicializado
@@ -16,9 +16,9 @@ void Ruido::Filtro_OFF(){ // Método usado para cancelar a verificação do filt
 bool Ruido::Inicializado(){ // Método que retorna o estado do filtro, iniciado ou não
     return filtro_inicializado;
 }
-bool Filtro_Ruido(){ // Método onde é verificado se o filtro acabou ou não
+bool Ruido::Filtro_Ruido(){ // Método onde é verificado se o filtro acabou ou não
 
-    if(((double)(clock()-temporizador)/100.0) >= tempo){
+    if(((double)(clock() - temporizador)/100.0) >= tempo){
         return true;
     }
     return false;
