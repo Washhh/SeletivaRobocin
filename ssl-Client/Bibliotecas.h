@@ -1,6 +1,7 @@
 #ifndef BIBLIOTECAS_H
 #define BIBLIOTECAS_H
 
+#include <omp.h>
 #include <QtNetwork>
 #include <stdio.h>
 #include "net/robocup_ssl_client.h"
